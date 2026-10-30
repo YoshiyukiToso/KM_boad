@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>株式市場ダッシュボード</title>
+    <!-- Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- TradingView Charting Library -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen">
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
+        <!-- Header Section -->
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 tracking-tight">市場ダッシュボード</h1>
+                <p class="text-slate-500 mt-1 text-sm md:text-base">コニカミノルタ & 日経平均株価の現在値・推移グラフ</p>
+            </div>
+            <div class="flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 px-4 py-2 rounded-full font-medium text-sm shadow-sm w-max">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+                </span>
+                ライブデータ更新中
+            </div>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8">
+            
+            <!-- Card 1: Konica Minolta -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[550px] transition-shadow hover:shadow-md">
+                <!-- Card Header & Timeframe Buttons -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-700 flex items-center gap-2">
+                            コニカミノルタ
+                            <span class="text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-1 rounded">TSE:4902</span>
+                        </h2>
+                    </div>
+                    <!-- Custom Timeframe Switcher -->
+                    <div class="flex space-x-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <button onclick="setTimeframe('konica', '60', this)" class="tf-btn px-4 py-1.5 text-sm font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">1時間</button>
+                        <button onclick="setTimeframe('konica', 'D', this)" class="tf-btn px-4 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white shadow-sm transition-all active-tf">1日</button>
+                        <button onclick="setTimeframe('konica', 'W', this)" class="tf-btn px-4 py-1.5 text-sm font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">1週</button>
+                    </div>
+                </div>
+                <!-- TradingView Widget Container -->
+                <div class="flex-grow w-full rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50" id="tv_konica">
+                    <!-- Widget will be injected here -->
+                </div>
+            </div>
+
+            <!-- Card 2: Nikkei 225 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6 flex flex-col h-[550px] transition-shadow hover:shadow-md">
+                <!-- Card Header & Timeframe Buttons -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-700 flex items-center gap-2">
+                            日経平均株価
+                            <span class="text-xs font-semibold bg-slate-100 text-slate-500 px-2 py-1 rounded">TVC:NI225</span>
+                        </h2>
+                    </div>
+                    <!-- Custom Timeframe Switcher -->
+                    <div class="flex space-x-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <button onclick="setTimeframe('nikkei', '60', this)" class="tf-btn px-4 py-1.5 text-sm font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">1時間</button>
+                        <button onclick="setTimeframe('nikkei', 'D', this)" class="tf-btn px-4 py-1.5 text-sm font-medium rounded-md bg-blue-600 text-white shadow-sm transition-all active-tf">1日</button>
+                        <button onclick="setTimeframe('nikkei', 'W', this)" class="tf-btn px-4 py-1.5 text-sm font-medium rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all">1週</button>
+                    </div>
+                </div>
+                <!-- TradingView Widget Container -->
+                <div class="flex-grow w-full rounded-xl overflow-hidden border border-slate-100 relative bg-slate-50" id="tv_nikkei">
+                    <!-- Widget will be injected here -->
+                </div>
+            </div>
+
+        </div>
+        
+        <footer class="mt-8 text-center text-sm text-slate-400">
+            Data provided by TradingView. <br class="sm:hidden" />This dashboard is for informational purposes only.
+        </footer>
+    </div>
+
+    <script>
+        // Configuration for the assets
+        const chartsConfig = {
+            konica: { symbol: "TSE:4902", currentInterval: "D" },
+            nikkei: { symbol: "TVC:NI225", currentInterval: "D" }
+        };
+
+        /**
+         * Function to initialize/render a TradingView widget
+         * @param {string} containerId - The ID of the div container
+         * @param {string} symbol - Market symbol (e.g., TSE:4902)
+         * @param {string} interval - Timeframe interval (60 for 1H, D for 1Day, W for 1Week)
+         */
+        function renderChart(containerId, symbol, interval) {
+            // Clear previous content
+            document.getElementById(containerId).innerHTML = ''; 
+            
+            // Initialize new widget instance
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": interval,
+                "timezone": "Asia/Tokyo",
+                "theme": "light",
+                "style": "3", // Area chart (perfect for trend visualization and highlights current price)
+                "locale": "ja",
+                "enable_publishing": false,
+                "hide_top_toolbar": true, // Hidden so we can use our custom UI buttons instead
+                "hide_legend": false,
+                "save_image": false,
+                "container_id": containerId,
+                "hide_volume": true,
+                "support_host": "https://www.tradingview.com"
+            });
+        }
+
+        /**
+         * Handle button clicks to change timeframe
+         * @param {string} assetKey - 'konica' or 'nikkei'
+         * @param {string} interval - '60', 'D', or 'W'
+         * @param {HTMLElement} btn - The clicked button element
+         */
+        function setTimeframe(assetKey, interval, btn) {
+            // 1. Update Button Styles
+            const group = btn.parentElement;
+            const buttons = group.querySelectorAll('.tf-btn');
+            
+            // Reset all buttons in the group
+            buttons.forEach(b => {
+                b.classList.remove('bg-blue-600', 'text-white', 'shadow-sm', 'active-tf');
+                b.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+            });
+            
+            // Highlight active button
+            btn.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+            btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm', 'active-tf');
+            
+            // 2. Re-render the specific chart with new interval
+            const containerId = `tv_${assetKey}`;
+            const symbol = chartsConfig[assetKey].symbol;
+            renderChart(containerId, symbol, interval);
+        }
+
+        // Render both charts on initial window load
+        window.onload = function() {
+            renderChart("tv_konica", chartsConfig.konica.symbol, chartsConfig.konica.currentInterval);
+            renderChart("tv_nikkei", chartsConfig.nikkei.symbol, chartsConfig.nikkei.currentInterval);
+        };
+    </script>
+</body>
+</html>
